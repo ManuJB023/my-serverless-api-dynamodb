@@ -1,0 +1,39 @@
+{
+  "name": "my-serverless-api",
+  "version": "1.0.0",
+  "description": "Serverless API with DynamoDB",
+  "main": "index.js",
+  "scripts": {
+    "start": "serverless offline start",
+    "deploy": "serverless deploy",
+    "deploy:dev": "serverless deploy --stage dev",
+    "deploy:prod": "serverless deploy --stage prod",
+    "remove": "serverless remove",
+    "logs": "serverless logs -f",
+    "info": "serverless info",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.470.0",
+    "@aws-sdk/lib-dynamodb": "^3.470.0",
+    "axios": "^1.11.0",
+    "uuid": "^11.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "serverless",
+    "aws",
+    "lambda",
+    "dynamodb",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless": "^4.17.2",
+    "serverless-dynamodb-local": "^0.1.1",
+    "serverless-offline": "^14.4.0"
+  }
+}
