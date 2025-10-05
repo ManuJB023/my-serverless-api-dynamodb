@@ -1,0 +1,49 @@
+service: my-serverless-api-local
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: local
+  stage: local
+
+custom:
+  dynamodb:
+    stages:
+      - local
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+      seed: false
+
+plugins:
+  - serverless-dynamodb-local
+  - serverless-offline
+
+resources:
+  Resources:
+    MyTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: myTable-local
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+functions:
+  hello:
+    handler: handler.hello
+    environment:
+      DYNAMODB_TABLE: myTable-local
+      IS_OFFLINE: "true"
+    events:
+      - http:
+          path: hello
+          method: get
+          cors: true

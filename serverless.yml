@@ -1,116 +1,52 @@
 service: my-serverless-api
-frameworkVersion: '4'
+
+frameworkVersion: "3"
 
 provider:
   name: aws
-  runtime: nodejs18.x
-  architecture: arm64
+  runtime: nodejs20.x
+  region: us-east-1
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
   environment:
-    USERS_TABLE: ${self:service}-${self:provider.stage}-users
-    STAGE: ${self:provider.stage}
-    VERSION: '1.0.0'
+    DYNAMODB_TABLE: myTable-${self:provider.stage}
+    IS_OFFLINE: ${opt:stage, 'false'}
+  
+  # Add IAM role statements for DynamoDB access
   iam:
     role:
       statements:
         - Effect: Allow
           Action:
-            - dynamodb:*
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:DescribeTable
+            - dynamodb:CreateTable
           Resource:
-            - !GetAtt UsersTable.Arn
-            - !Sub "${UsersTable.Arn}/index/*"
-
-functions:
-  health:
-    handler: handlers/health.health
-    memorySize: 128
-    timeout: 5
-    events:
-      - httpApi:
-          path: /health
-          method: get
-
-  createUser:
-    handler: handlers/users.create
-    memorySize: 256
-    timeout: 10
-    events:
-      - httpApi:
-          path: /users
-          method: post
-
-  getUser:
-    handler: handlers/users.get
-    memorySize: 128
-    timeout: 5
-    events:
-      - httpApi:
-          path: /users/{id}
-          method: get
-
-  listUsers:
-    handler: handlers/users.list
-    memorySize: 256
-    timeout: 10
-    events:
-      - httpApi:
-          path: /users
-          method: get
-
-  updateUser:
-    handler: handlers/users.update
-    memorySize: 256
-    timeout: 10
-    events:
-      - httpApi:
-          path: /users/{id}
-          method: put
-
-  deleteUser:
-    handler: handlers/users.delete
-    memorySize: 128
-    timeout: 5
-    events:
-      - httpApi:
-          path: /users/{id}
-          method: delete
+            - !GetAtt MyDynamoDBTable.Arn
 
 resources:
   Resources:
-    UsersTable:
+    MyDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:provider.environment.USERS_TABLE}
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
         AttributeDefinitions:
           - AttributeName: id
-            AttributeType: S
-          - AttributeName: email
             AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
-        GlobalSecondaryIndexes:
-          - IndexName: EmailIndex
-            KeySchema:
-              - AttributeName: email
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
         BillingMode: PAY_PER_REQUEST
-        SSESpecification:
-          SSEEnabled: true
 
-plugins:
-  - serverless-offline
-  # - serverless-dynamodb-local  # Temporarily disabled until Java is installed
-
-custom:
-  serverless-offline:
-    httpPort: 3000
-    noPrependStageInUrl: true
-  # dynamodb:
-  #   start:
-  #     migrate: true
-  #   stages:
-  #     - dev
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: hello
+          method: get
+          cors: true

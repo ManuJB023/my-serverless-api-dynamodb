@@ -1,0 +1,245 @@
+{
+    "Items": [
+        {
+            "createdAt": {
+                "S": "2025-07-31T20:50:27.349Z"
+            },
+            "id": {
+                "S": "324798cb-bf77-45e1-a7ed-d79e669b34d6"
+            },
+            "email": {
+                "S": "user1@test.com"
+            },
+            "name": {
+                "S": "User1"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T20:50:27.349Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T20:50:27.636Z"
+            },
+            "id": {
+                "S": "0cdb8007-00a9-4909-8b6c-7d56a237b2a9"
+            },
+            "email": {
+                "S": "user8@test.com"
+            },
+            "name": {
+                "S": "User8"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T20:50:27.636Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T20:50:27.463Z"
+            },
+            "id": {
+                "S": "07dec89e-32fd-41d2-a798-01779ff000a7"
+            },
+            "email": {
+                "S": "user4@test.com"
+            },
+            "name": {
+                "S": "User4"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T20:50:27.463Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T20:50:27.507Z"
+            },
+            "id": {
+                "S": "5cfdb16b-b2e8-4ed7-86c9-166cc3730fee"
+            },
+            "email": {
+                "S": "user5@test.com"
+            },
+            "name": {
+                "S": "User5"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T20:50:27.507Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T20:50:27.414Z"
+            },
+            "id": {
+                "S": "d0eef27d-1369-4b25-a8e6-a50e22649f7e"
+            },
+            "email": {
+                "S": "user2@test.com"
+            },
+            "name": {
+                "S": "User2"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T20:50:27.414Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T16:36:23.855Z"
+            },
+            "id": {
+                "S": "b4a94196-0daa-4ce6-ad80-87f2983c1910"
+            },
+            "email": {
+                "S": "manujb46@outlook.com"
+            },
+            "name": {
+                "S": "Manuel Bauka"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T16:36:23.855Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T20:50:27.423Z"
+            },
+            "id": {
+                "S": "f908dab3-dfc7-408d-acc5-df3cef237f0a"
+            },
+            "email": {
+                "S": "user3@test.com"
+            },
+            "name": {
+                "S": "User3"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T20:50:27.423Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T20:50:27.708Z"
+            },
+            "id": {
+                "S": "a6c27aea-e8ae-4d20-8a10-ef6aefa72088"
+            },
+            "email": {
+                "S": "user10@test.com"
+            },
+            "name": {
+                "S": "User10"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T20:50:27.708Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T20:50:27.662Z"
+            },
+            "id": {
+                "S": "93a17898-b99d-436d-8117-c43c92f93f4e"
+            },
+            "email": {
+                "S": "user9@test.com"
+            },
+            "name": {
+                "S": "User9"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T20:50:27.662Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T20:50:27.580Z"
+            },
+            "id": {
+                "S": "f848e738-1af2-420b-804a-f6b34cdf4ba0"
+            },
+            "email": {
+                "S": "user7@test.com"
+            },
+            "name": {
+                "S": "User7"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T20:50:27.580Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T16:42:06.447Z"
+            },
+            "id": {
+                "S": "f6db0322-635c-4cc7-bee0-60f2ae92bf11"
+            },
+            "email": {
+                "S": "test@example.com"
+            },
+            "name": {
+                "S": "Test User"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T16:42:06.447Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T18:10:13.757Z"
+            },
+            "id": {
+                "S": "a31161de-e34e-44ee-9d89-e98724fba196"
+            },
+            "email": {
+                "S": "manujb46@outlook.com"
+            },
+            "name": {
+                "S": "Manuel Bauka"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T18:10:13.757Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T20:37:02.488Z"
+            },
+            "id": {
+                "S": "d59531a6-be8d-4a5a-9c1c-aa49a71bc561"
+            },
+            "email": {
+                "S": "test@example.com"
+            },
+            "name": {
+                "S": "Test"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T20:37:02.488Z"
+            }
+        },
+        {
+            "createdAt": {
+                "S": "2025-07-31T20:50:27.540Z"
+            },
+            "id": {
+                "S": "00bbe671-43e3-4dd2-b86d-10b6fa5fc980"
+            },
+            "email": {
+                "S": "user6@test.com"
+            },
+            "name": {
+                "S": "User6"
+            },
+            "updatedAt": {
+                "S": "2025-07-31T20:50:27.540Z"
+            }
+        }
+    ],
+    "Count": 14,
+    "ScannedCount": 14,
+    "ConsumedCapacity": null
+}

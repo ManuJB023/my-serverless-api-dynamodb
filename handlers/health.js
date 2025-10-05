@@ -1,15 +1,14 @@
 module.exports.health = async () => {
+  const isOffline = process.env.IS_OFFLINE === 'true';
+
   return {
     statusCode: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    },
     body: JSON.stringify({
       message: 'API is healthy!',
+      environment: isOffline ? 'offline (local)' : 'AWS Lambda',
+      stage: process.env.STAGE || 'unknown',
+      version: process.env.VERSION || 'unknown',
       timestamp: new Date().toISOString(),
-      stage: process.env.STAGE || 'dev',
-      version: process.env.VERSION || '1.0.0'
-    }, null, 2),
+    }),
   };
 };

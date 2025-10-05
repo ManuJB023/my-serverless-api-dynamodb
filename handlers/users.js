@@ -1,193 +1,104 @@
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+const {
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  ScanCommand,
+  UpdateCommand,
+  DeleteCommand,
+} = require('@aws-sdk/lib-dynamodb');
 const { v4: uuidv4 } = require('uuid');
 
-// Initialize DynamoDB Client
-const dynamodb = DynamoDBDocument.from(new DynamoDBClient({
-  region: process.env.AWS_REGION || 'us-east-1'
-}));
+const isOffline = process.env.IS_OFFLINE === 'true';
 
-const USERS_TABLE = process.env.USERS_TABLE;
-
-// Enhanced response formatter
-const formatResponse = (statusCode, data) => ({
-  statusCode,
-  headers: {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-  },
-  body: JSON.stringify(data, null, 2),
+const client = new DynamoDBClient({
+  region: 'us-east-1',
+  ...(isOffline && { endpoint: 'http://localhost:8000' }) // use local DB when offline
 });
 
-// Input validator
-const validateUserInput = (userData, isUpdate = false) => {
-  const errors = [];
-  
-  if (!isUpdate) {
-    if (!userData.name?.trim()) errors.push('Name is required');
-    if (!userData.email?.trim()) errors.push('Email is required');
-  }
+const ddb = DynamoDBDocumentClient.from(client);
+const TABLE_NAME = process.env.USERS_TABLE;
 
-  if (userData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
-    errors.push('Invalid email format');
-  }
-
-  return errors.length ? { valid: false, errors } : { valid: true };
-};
-
+// Create user
 module.exports.create = async (event) => {
   try {
-    const requestBody = JSON.parse(event.body || '{}');
-    const validation = validateUserInput(requestBody);
-    
-    if (!validation.valid) {
-      return formatResponse(400, { errors: validation.errors });
+    const data = JSON.parse(event.body);
+    if (!data.name || !data.email) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Name and email are required' }) };
     }
 
-    const user = {
-      id: uuidv4(),
-      name: requestBody.name.trim(),
-      email: requestBody.email.trim().toLowerCase(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const user = { id: uuidv4(), name: data.name, email: data.email };
 
-    await dynamodb.put({
-      TableName: USERS_TABLE,
-      Item: user,
-      ConditionExpression: 'attribute_not_exists(email)',
-    });
+    await ddb.send(new PutCommand({ TableName: TABLE_NAME, Item: user }));
 
-    return formatResponse(201, user);
-  } catch (error) {
-    console.error('Create Error:', error);
-    
-    if (error.name === 'ConditionalCheckFailedException') {
-      return formatResponse(409, { error: 'Email already exists' });
-    }
-    return formatResponse(500, { error: 'Internal server error' });
+    return { statusCode: 200, body: JSON.stringify(user) };
+  } catch (err) {
+    console.error('Create user failed:', err);
+    return { statusCode: 500, body: JSON.stringify({ error: 'Could not create user' }) };
   }
 };
 
+// Get user
 module.exports.get = async (event) => {
   try {
-    const { id } = event.pathParameters || {};
-    
-    if (!id) {
-      return formatResponse(400, { error: 'User ID is required' });
-    }
+    const { id } = event.pathParameters;
 
-    const result = await dynamodb.get({
-      TableName: USERS_TABLE,
-      Key: { id },
-    });
+    const result = await ddb.send(new GetCommand({ TableName: TABLE_NAME, Key: { id } }));
 
     if (!result.Item) {
-      return formatResponse(404, { error: 'User not found' });
+      return { statusCode: 404, body: JSON.stringify({ error: 'User not found' }) };
     }
 
-    return formatResponse(200, result.Item);
-  } catch (error) {
-    console.error('Get Error:', error);
-    return formatResponse(500, { error: 'Internal server error' });
+    return { statusCode: 200, body: JSON.stringify(result.Item) };
+  } catch (err) {
+    console.error('Get user failed:', err);
+    return { statusCode: 500, body: JSON.stringify({ error: 'Could not get user' }) };
   }
 };
 
+// List users
 module.exports.list = async () => {
   try {
-    const result = await dynamodb.scan({
-      TableName: USERS_TABLE,
-      Limit: 100,
-    });
-
-    return formatResponse(200, {
-      users: result.Items || [],
-      count: result.Count || 0,
-    });
-  } catch (error) {
-    console.error('List Error:', error);
-    return formatResponse(500, { error: 'Internal server error' });
+    const result = await ddb.send(new ScanCommand({ TableName: TABLE_NAME }));
+    return { statusCode: 200, body: JSON.stringify(result.Items || []) };
+  } catch (err) {
+    console.error('List users failed:', err);
+    return { statusCode: 500, body: JSON.stringify({ error: 'Could not list users' }) };
   }
 };
 
+// Update user
 module.exports.update = async (event) => {
   try {
-    const { id } = event.pathParameters || {};
-    const requestBody = JSON.parse(event.body || '{}');
-    
-    if (!id) {
-      return formatResponse(400, { error: 'User ID is required' });
-    }
+    const { id } = event.pathParameters;
+    const data = JSON.parse(event.body);
 
-    const validation = validateUserInput(requestBody, true);
-    if (!validation.valid) {
-      return formatResponse(400, { errors: validation.errors });
-    }
-
-    const updateExpressions = [];
-    const expressionValues = {};
-    const expressionNames = {};
-
-    if (requestBody.name) {
-      updateExpressions.push('#name = :name');
-      expressionNames['#name'] = 'name';
-      expressionValues[':name'] = requestBody.name.trim();
-    }
-
-    if (requestBody.email) {
-      updateExpressions.push('email = :email');
-      expressionValues[':email'] = requestBody.email.trim().toLowerCase();
-    }
-
-    if (updateExpressions.length === 0) {
-      return formatResponse(400, { error: 'No valid fields to update' });
-    }
-
-    updateExpressions.push('updatedAt = :updatedAt');
-    expressionValues[':updatedAt'] = new Date().toISOString();
-
-    const result = await dynamodb.update({
-      TableName: USERS_TABLE,
+    const result = await ddb.send(new UpdateCommand({
+      TableName: TABLE_NAME,
       Key: { id },
-      UpdateExpression: 'SET ' + updateExpressions.join(', '),
-      ExpressionAttributeValues: expressionValues,
-      ExpressionAttributeNames: Object.keys(expressionNames).length > 0 ? expressionNames : undefined,
+      UpdateExpression: 'set #name = :name',
+      ExpressionAttributeNames: { '#name': 'name' },
+      ExpressionAttributeValues: { ':name': data.name },
       ReturnValues: 'ALL_NEW',
-      ConditionExpression: 'attribute_exists(id)',
-    });
+    }));
 
-    return formatResponse(200, result.Attributes);
-  } catch (error) {
-    console.error('Update Error:', error);
-    
-    if (error.name === 'ConditionalCheckFailedException') {
-      return formatResponse(404, { error: 'User not found' });
-    }
-    return formatResponse(500, { error: 'Internal server error' });
+    return { statusCode: 200, body: JSON.stringify(result.Attributes) };
+  } catch (err) {
+    console.error('Update user failed:', err);
+    return { statusCode: 500, body: JSON.stringify({ error: 'Could not update user' }) };
   }
 };
 
-module.exports.delete = async (event) => {
+// Delete user
+module.exports.remove = async (event) => {
   try {
-    const { id } = event.pathParameters || {};
-    
-    if (!id) {
-      return formatResponse(400, { error: 'User ID is required' });
-    }
+    const { id } = event.pathParameters;
 
-    await dynamodb.delete({
-      TableName: USERS_TABLE,
-      Key: { id },
-      ConditionExpression: 'attribute_exists(id)',
-    });
+    await ddb.send(new DeleteCommand({ TableName: TABLE_NAME, Key: { id } }));
 
-    return formatResponse(200, { message: 'User deleted successfully' });
-  } catch (error) {
-    console.error('Delete Error:', error);
-    
-    if (error.name === 'ConditionalCheckFailedException') {
-      return formatResponse(404, { error: 'User not found' });
-    }
-    return formatResponse(500, { error: 'Internal server error' });
+    return { statusCode: 200, body: JSON.stringify({ message: 'User deleted' }) };
+  } catch (err) {
+    console.error('Delete user failed:', err);
+    return { statusCode: 500, body: JSON.stringify({ error: 'Could not delete user' }) };
   }
 };

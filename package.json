@@ -1,39 +1,29 @@
 {
   "name": "my-serverless-api",
   "version": "1.0.0",
-  "description": "Serverless API with DynamoDB",
-  "main": "index.js",
+  "description": "Serverless API with local DynamoDB",
+  "main": "handler.js",
   "scripts": {
-    "start": "serverless offline start",
-    "deploy": "serverless deploy",
+    "dynamodb:install": "echo 'DynamoDB Local installed in .dynamodb folder'",
+    "dynamodb:start": "java -Djava.library.path=\".dynamodb/DynamoDBLocal_lib\" -jar \".dynamodb/DynamoDBLocal.jar\" -sharedDb -inMemory -port 8000",
+    "offline": "serverless offline start --stage local",
     "deploy:dev": "serverless deploy --stage dev",
     "deploy:prod": "serverless deploy --stage prod",
-    "remove": "serverless remove",
-    "logs": "serverless logs -f",
-    "info": "serverless info",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "remove:dev": "serverless remove --stage dev",
+    "remove:prod": "serverless remove --stage prod",
+    "start": "npm run dev",
+    "dev": "concurrently \"npm run dynamodb:start\" \"npm run offline\"",
+    "logs:dev": "serverless logs --function hello --stage dev",
+    "logs:prod": "serverless logs --function hello --stage prod"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.470.0",
-    "@aws-sdk/lib-dynamodb": "^3.470.0",
-    "axios": "^1.11.0",
-    "uuid": "^11.1.0"
+    "@aws-sdk/client-dynamodb": "^3.902.0",
+    "@aws-sdk/lib-dynamodb": "^3.902.0"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "keywords": [
-    "serverless",
-    "aws",
-    "lambda",
-    "dynamodb",
-    "api"
-  ],
-  "author": "",
-  "license": "MIT",
   "devDependencies": {
-    "serverless": "^4.17.2",
-    "serverless-dynamodb-local": "^0.1.1",
-    "serverless-offline": "^14.4.0"
+    "concurrently": "^7.6.0",
+    "kill-port": "^2.0.1",
+    "serverless": "^3.40.0",
+    "serverless-offline": "^11.0.0"
   }
 }
